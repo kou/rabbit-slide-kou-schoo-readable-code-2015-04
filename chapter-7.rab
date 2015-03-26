@@ -266,7 +266,7 @@
 
 = 7.2 指針
 
-  * 否定形より肯定形を使う
+  * 否定形は肯定形にして書く
     * if (!debug)よりif (debug)
   * 単純な処理の条件を先に書く
     * ifとelseを一望できて読みやすい
@@ -314,6 +314,247 @@
   * 処理する条件の順番次第で\n
     リーダブル度があがる
   * 指針：
-    * 否定形より肯定形
+    * 否定形は肯定形にして書く
     * 単純な条件を先に書く
     * 関心がある・目立つ条件を先に書く
+
+= 7.5 関数から早く返す
+
+(('tag:center'))
+「ガード節」
+
+  # coderay java
+
+  public boolean Contains(String str, String substr) {
+    if (str == null || substr == null) return false;
+    if (substr.equals("")) return true;
+    // ...
+  }
+
+= 7.5 ガード節の効果
+
+  * 以降の処理が単純になる
+    * 異常値・特別値を考慮しなくてよい
+    * →考える事が減る
+  * ネストが浅くなる
+    * →コードの見通しがよくなる
+
+(('tag:center'))
+リーダブルコードにつながる！
+
+= 番外：ifとreturnの使い方
+
+(('tag:center'))
+ifとreturnの使い方\n
+ククログ(2012-03-28)\n
+(('note:http://www.clear-code.com/blog/2012/3/28.html'))
+
+((' '))
+
+= 番外：パス
+
+(('tag:center'))
+同じ処理でも流れ（パス）は違う
+
+  # coderay ruby
+
+  if 条件    | return if 条件
+    サブ処理 |
+  end        | サブ処理
+
+= 番外：パスとリーダブル
+
+  * 処理を実行するときの流れ
+  * コードを読むときの流れ
+    * 読みやすい流れにすれば\n
+      リーダブルになる！
+
+= 番外：例（1）
+
+  # coderay ruby
+
+  def add_comment(post, user, text)
+    if post.hidden_from?(user)
+      report_access_error
+    else
+      comment = Comment.create(text)
+      post.add(comment)
+    end
+  end
+
+= 番外：例（1）コメント付き
+
+  # coderay ruby
+
+  # コメントを追加するメソッドだな！
+  def add_comment(post, user, text)
+    if post.hidden_from?(user)
+      # コメント追加しないの！？
+      report_access_error
+    else
+      # ネストされているけど正常系の処理か
+      # ifの方と同列の処理かと思った
+      comment = Comment.create(text)
+      post.add(comment)
+    end
+  end
+
+= 番外：例（1）return付き
+
+  # coderay ruby
+
+  # コメントを追加するメソッドだな！
+  def add_comment(post, user, text)
+    if post.hidden_from?(user)
+      # ネストされているし特別な処理なんだな
+      report_access_error
+      return
+    end
+
+    # 通常はコメントが追加されるんだな！
+    comment = Comment.create(text)
+    post.add(comment)
+  end
+
+= 番外：例（1）まとめ
+
+  * 正常系と異常系の扱いを変える
+    * 正常系の方が重要なコード
+  * 正常系はネストしない
+    * 重要なコードは見やすい場所に
+
+= 番外：例（2）
+
+  # coderay ruby
+
+  def prepare_database(path)
+    if not File.exist?(path)
+      return Database.create(path)
+    end
+
+    Database.open(path)
+  end
+
+= 番外：例（2）コメント付き
+
+  # coderay ruby
+
+  # データベースを準備するんだな
+  def prepare_database(path)
+    if not File.exist?(path)
+      # なかったら作るのか
+      return Database.create(path)
+    end
+
+    # あったら開くのか
+    # あれ、どっちも正常系じゃない？
+    Database.open(path)
+  end
+
+= 番外：例（2）returnなし
+
+  # coderay ruby
+
+  # データベースを準備するんだな
+  def prepare_database(path)
+    if File.exist?(path)
+      # あったら開いて
+      Database.open(path)
+    else
+      # なかったら作るのか
+      Database.create(path)
+    end
+  end
+
+= 番外：例（2）まとめ
+
+  * 正常系同士の扱いを変えない
+    * 変えると異常系と勘違いしてしまう
+  * なんでもガード節にしない
+    * 特別なケースや異常系のときだけ
+
+= 他の例
+
+  * 三項演算子
+  * ネストを浅くする
+  * …
+  * （詳細は本を買ってください）
+
+= 実際の改善にチャレンジ！
+
+    TODO
+
+  * 誤解されない名前に改善して投稿
+  * よい投稿に「いいね！」して応援
+
+= まとめ（1）
+
+  * リーダブルコードとは
+    * 変更できるコード
+    * バグを見つけられるコード
+    * ↑は((*読む人視点*))
+
+= まとめ（2）
+
+  * 「読みやすい制御フロー」を\n
+    考えた
+    * 条件式内の並び順
+      * →左に変化するもの・右に変化しにくいもの
+    * 条件による処理の順番
+      * →肯定形で書く・単純な条件を先に書くなど
+    * ガード節
+      * →特別なケースはすぐにreturn
+
+= まとめ（3）
+
+  * 実際の改善にチャレンジした
+    * 「((*読む人*))が理解しやすいか？」を\n
+      とことん考えたはず
+
+  # blockquote
+  # title = 7章 制御フローを読みやすくする p. 89
+
+  鍵となる考え\n
+  行数を短くするよりも、他の人が理解するのにかかる時間を短くする。
+
+= これから（1）
+
+  * これからも((*読む人*))のことを\n
+    考えてコードを書こう
+  * ((*読む人*))のことを考えるには？
+    * 読む経験をたくさん積む
+    * たくさんコードを読もう
+
+= これから（2）
+
+  * たくさんコードを読むコツ
+    * コードから学ぶ気持ちで読む
+    * ×悪いこと探し
+    * ○いいこと探し
+    * 本来、コードを読むことは\n
+      楽しいことのはず！
+
+= 悪いコード
+
+  * 見つけやすい
+    * 異質
+    * リーダブルじゃない
+
+= よいコード
+
+  * 見つけにくい
+    * リーダブルだから
+    * すーっと理解できてひっかからない
+  * これからのチャレンジ
+    * 意識して見つけよう！
+
+= これから（3）
+
+(('tag:center'))(('tag:large'))
+「解説」を読む\n
+(('note:http://www.clear-code.com/blog/2012/6/11.html'))
+
+  * 本文：((*個人*))で\n
+    リーダブルコードを書く方法
+  * 解説：((*チーム*))で\n
+    リーダブルコードを書く方法
