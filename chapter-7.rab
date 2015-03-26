@@ -78,3 +78,242 @@
 : enable-title-on-image
    false
 
+= リーダブルコードとは（1）
+
+  # blockquote
+  # title = はじめに p. x
+
+  本書の目的は、君のコードをよくすることだ
+
+= リーダブルコードとは（2）
+
+  # blockquote
+  # title = はじめに p. x
+
+  その中心となるのは、コードは理解しやすくなければいけないという考えだ
+
+= リーダブルコードとは（3）
+
+  # blockquote
+  # title = 1.2 読みやすさの基本定理 p. 3
+
+  「コードを理解する」というのは、変更を加えたりバグを見つけたりできるという意味
+
+= リーダブルコード
+
+読む人が…
+
+  * 変更できるコード
+  * バグを見つけられるコード
+
+(('tag:center'))(('tag:x-large'))
+↓\n
+読む人視点！
+
+= 何をしているコード？
+
+  # coderay cpp
+
+  Node* node = list->head;
+  if (node == NULL) return;
+
+  while (node->next != NULL) {
+      Print(node->data);
+      node = node->next;
+  }
+  if (node != NULL) Print(node->data);
+
+(('tag:center'))(('note:「優れた」コードって何？ p. 2より'))
+
+= 何をしているコード？
+
+  # coderay cpp
+
+  for (Node* node = list->head;
+       node != NULL;
+       node = node->next)
+      Print(node->data);
+
+(('tag:center'))(('note:「優れた」コードって何？ p. 2より'))
+
+= どちらがリーダブル？
+
+  # coderay cpp
+
+  // どちらがリーダブルコード？どうして？
+  // リーダブルコード：変更できる・バグを見つけられるコード
+  // A.
+  Node* node = list->head;
+  if (node == NULL) return;
+  while (node->next != NULL) {
+      Print(node->data);
+      node = node->next;
+  }
+  if (node != NULL) Print(node->data);
+  // B.
+  for (Node* node = list->head; node != NULL; node = node->next)
+      Print(node->data);
+
+(('tag:center'))(('note:「優れた」コードって何？ p. 2より'))
+
+= 実例で考えよう
+
+(('tag:center'))
+7章\n
+「制御フローを読みやすくする」\n
+より
+
+((' '))
+
+= 7.1 例：式の並び順（1）
+
+  # coderay c
+
+  /* A */
+  if (length >= 10)
+  /* B */
+  if (10 <= length)
+
+(('tag:center'))
+どちらがリーダブル？
+
+= 7.1 例：式の並び順（2）
+
+  # coderay c
+
+  /* A */
+  while (bytes_received < bytes_expected)
+  /* B */
+  while (bytes_expected > bytes_received)
+
+(('tag:center'))
+どちらがリーダブル？
+
+= 7.1 式の並び順の指針
+
+  * 左側
+    * 「調査対象」の式。変化する。
+    * (({length})), (({bytes_received}))
+  * 右側
+    * 「比較対象」の式。変化しにくい。
+    * (({10})), (({bytes_expected}))
+
+= 7.1 指針に沿った並び順
+
+  # coderay c
+
+  /*  ↓調査対象。変化する。 */
+  if (length >= 10)
+  /*           ↑比較対象。変化しない。 */
+  /*     ↓調査対象 */
+  while (bytes_received < bytes_expected)
+  /*                     ↑比較対象 */
+
+= 7.1 指針の理由
+
+(('tag:center'))
+自然言語の並び順に近い
+
+  # coderay c
+
+  /* もし長さが10以上なら */
+  if (length >= 10)
+
+  /* もし10が長さ以下なら */
+  if (10 <= length)
+
+= 番外：別の指針
+
+  * 左側
+    * 小さい値
+  * 右側
+    * 大きい値
+
+左から右にいくほど\n
+大きくなることは自然\n
+(('note:（例：数直線）'))
+
+= 番外：指針に沿った並び順
+
+使う比較演算子は「(({<}))」と「(({<=}))」
+
+  # coderay c
+
+  if (10 <= length)
+
+  while (bytes_received < bytes_expected)
+
+= 7.1：まとめ
+
+  * 条件式内の並び順を工夫すると\n
+    リーダブル度があがる
+  * 指針：
+    * 左側：変化する式
+    * 右側：変化しにくい式
+
+= 7.2 例：処理の順番
+
+  # coderay c
+
+  if (a == b) {   | if (a != b) {
+    /* ケース1 */ |   /* ケース2 */
+  } else {        | } else {
+    /* ケース2 */ |   /* ケース1 */
+  }               | }
+
+(('tag:center'))
+どちらがリーダブル？
+
+= 7.2 指針
+
+  * 否定形より肯定形を使う
+    * if (!debug)よりif (debug)
+  * 単純な処理の条件を先に書く
+    * ifとelseを一望できて読みやすい
+  * 関心を引く条件を先に書く
+  * 目立つ条件を先に書く
+
+= 7.2 指針：注意
+
+  * 同時に満たせないことがある
+  * 自分で優劣を判断すること
+  * 優劣は明確になることが多い
+
+= 7.2 判断してみよう
+
+  # coderay cpp
+
+  if (!url.HasQueryParameter("expand_all")) {
+    response.Render(items);
+    // ...
+  } else {
+    for (int i = 0; i < items.size(); i++) {
+      items[i].Expand();
+    }
+    // ...
+  }
+
+= 7.2 !を外して順番を逆に
+
+  # coderay cpp
+
+  // 関心が引く条件「expand_all」を優先
+  // （肯定形になったのはおまけ）
+  if (url.HasQueryParameter("expand_all")) {
+    for (int i = 0; i < items.size(); i++) {
+      items[i].Expand();
+    }
+    // ...
+  } else {
+    response.Render(items);
+    // ...
+  }
+
+= 7.2 まとめ
+
+  * 処理する条件の順番次第で\n
+    リーダブル度があがる
+  * 指針：
+    * 否定形より肯定形
+    * 単純な条件を先に書く
+    * 関心がある・目立つ条件を先に書く
