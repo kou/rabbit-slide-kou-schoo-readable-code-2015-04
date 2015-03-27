@@ -482,10 +482,21 @@ ifとreturnの使い方\n
 
 = 実際の改善にチャレンジ！
 
-    TODO
+  # coderay javascript
 
-  * 誤解されない名前に改善して投稿
-  * よい投稿に「いいね！」して応援
+  // 読みやすい制御フローにして投稿・よい投稿に「いいね！」して応援
+
+  function positiveIntegerSum(n) { // n以下の正の整数の合計を返す
+    if (0 >= n) {
+      return -1; // エラー
+    } else {
+      var total = 0;
+      for (; n > 0; n--) {
+        total += n;
+      }
+      return total;
+    }
+  }
 
 = まとめ（1）
 
