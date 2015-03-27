@@ -255,6 +255,7 @@
 
   # coderay c
 
+  /* A            | B            */
   if (a == b) {   | if (a != b) {
     /* ケース1 */ |   /* ケース2 */
   } else {        | } else {
@@ -263,6 +264,20 @@
 
 (('tag:center'))
 どちらがリーダブル？
+
+= 7.2 例：処理の順番
+
+  # coderay c
+
+  /* A            | B            */
+  if (a == b) {   | if (a != b) {
+    /* ケース1 */ |   /* ケース2 */
+  } else {        | } else {
+    /* ケース2 */ |   /* ケース1 */
+  }               | }
+
+(('tag:center'))
+A（左）の方がリーダブル
 
 = 7.2 指針
 
@@ -297,7 +312,7 @@
 
   # coderay cpp
 
-  // 関心が引く条件「expand_all」を優先
+  // 関心を引く条件「expand_all」を優先
   // （肯定形になったのはおまけ）
   if (url.HasQueryParameter("expand_all")) {
     for (int i = 0; i < items.size(); i++) {
@@ -364,10 +379,11 @@ ifとreturnの使い方\n
 
 = 番外：パスとリーダブル
 
-  * 処理を実行するときの流れ
-  * コードを読むときの流れ
-    * 読みやすい流れにすれば\n
-      リーダブルになる！
+  * パス
+    * 処理を実行するときの流れ
+    * コードを読むときの流れでもある
+  * 読みやすい流れ
+    * →リーダブル！
 
 = 番外：例（1）
 
@@ -392,8 +408,9 @@ ifとreturnの使い方\n
       # コメント追加しないの！？
       report_access_error
     else
-      # ネストされているけど正常系の処理か
-      # ifの方と同列の処理かと思った
+      # else（その他）の方の処理だけど
+      # このメソッドにとって大事な処理か
+      # ifの方と同列の大事さの処理かと思った
       comment = Comment.create(text)
       post.add(comment)
     end
@@ -406,12 +423,12 @@ ifとreturnの使い方\n
   # コメントを追加するメソッドだな！
   def add_comment(post, user, text)
     if post.hidden_from?(user)
-      # ネストされているし特別な処理なんだな
+      # すぐにreturnしているし特別な処理なんだな
       report_access_error
       return
     end
 
-    # 通常はコメントが追加されるんだな！
+    # 通常はコメントを追加するんだな！
     comment = Comment.create(text)
     post.add(comment)
   end
@@ -443,11 +460,13 @@ ifとreturnの使い方\n
   def prepare_database(path)
     if not File.exist?(path)
       # なかったら作るのか
+      # あれ、作るのも普通の「準備」なような…
       return Database.create(path)
     end
 
     # あったら開くのか
-    # あれ、どっちも正常系じゃない？
+    # やっぱりどっちも「準備」だよなぁ
+    # なにか特別な意図があるんだろうか…
     Database.open(path)
   end
 
@@ -469,7 +488,8 @@ ifとreturnの使い方\n
 = 番外：例（2）まとめ
 
   * 正常系同士の扱いを変えない
-    * 変えると異常系と勘違いしてしまう
+    * 変えると意図があると勘違いする
+    * 「Aの処理は何か特別なのかも…」
   * なんでもガード節にしない
     * 特別なケースや異常系のときだけ
 
@@ -525,7 +545,6 @@ ifとreturnの使い方\n
   # blockquote
   # title = 7章 制御フローを読みやすくする p. 89
 
-  鍵となる考え\n
   行数を短くするよりも、他の人が理解するのにかかる時間を短くする。
 
 = これから（1）
