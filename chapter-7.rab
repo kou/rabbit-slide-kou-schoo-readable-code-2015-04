@@ -142,7 +142,7 @@
 
   // どちらがリーダブルコード？どうして？
   // リーダブルコード：変更できる・バグを見つけられるコード
-  // A.                          // B.
+  // A                           // B
   Node* node = list->head;     | for (Node* node = list->head;
   if (node == NULL) return;    |      node != NULL;
   while (node->next != NULL) { |      node = node->next)
@@ -253,7 +253,7 @@
 
   # coderay c
 
-  /* A            | B            */
+  /* A */         | /* B */
   if (a == b) {   | if (a != b) {
     /* ケース1 */ |   /* ケース2 */
   } else {        | } else {
@@ -267,7 +267,7 @@
 
   # coderay c
 
-  /* A            | B            */
+  /* A */         | /* B */
   if (a == b) {   | if (a != b) {
     /* ケース1 */ |   /* ケース2 */
   } else {        | } else {
