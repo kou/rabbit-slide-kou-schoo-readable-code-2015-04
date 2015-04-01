@@ -142,17 +142,15 @@
 
   // どちらがリーダブルコード？どうして？
   // リーダブルコード：変更できる・バグを見つけられるコード
-  // A.
-  Node* node = list->head;
-  if (node == NULL) return;
-  while (node->next != NULL) {
-      Print(node->data);
-      node = node->next;
-  }
-  if (node != NULL) Print(node->data);
-  // B.
-  for (Node* node = list->head; node != NULL; node = node->next)
-      Print(node->data);
+  // A.                          // B.
+  Node* node = list->head;     | for (Node* node = list->head;
+  if (node == NULL) return;    |      node != NULL;
+  while (node->next != NULL) { |      node = node->next)
+      Print(node->data);       |     Print(node->data);
+      node = node->next;       |
+  }                            |
+  if (node != NULL)            |
+      Print(node->data);       |
 
 (('tag:center'))(('note:「優れた」コードって何？ p. 2より'))
 
@@ -341,9 +339,30 @@ A（左）の方がリーダブル
   # coderay java
 
   public boolean Contains(String str, String substr) {
-    if (str == null || substr == null) return false;
-    if (substr.equals("")) return true;
+    if (str == null || substr == null) // ガード節
+      return false;
+    if (substr.equals(""))             // ガード節
+      return true;
+    // 大事な処理だけに興味があるなら↑までは無視可能。
+    // 大事な処理は↓から。
     // ...
+  }
+
+= 7.5 ガード節なし
+
+  # coderay java
+
+  public boolean Contains(String str, String substr) {
+    if (str == null || substr == null) {
+      return false; // 異常値
+    } else {
+      if (substr.equals("")) {
+        return true; // 特別値
+      } else {
+        // 大事な処理はここ。ネストが深い。
+        // ...
+      }
+    }
   }
 
 = 7.5 ガード節の効果
@@ -373,7 +392,7 @@ ifとreturnの使い方\n
 
   # coderay ruby
 
-  if 条件    | return if 条件
+  if 条件    | return if !条件
     サブ処理 |
   end        | サブ処理
 
@@ -507,16 +526,16 @@ ifとreturnの使い方\n
   // 読みやすい制御フローにして投稿・よい投稿に「いいね！」して応援
 
   function positiveIntegerSum(n) { // n以下の正の整数の合計を返す
-    if (0 >= n) {
-      return -1; // エラー
-    } else {
-      var total = 0;
-      for (; n > 0; n--) {
-        total += n;
-      }
-      return total;
-    }
-  }
+    if (0 >= n) {            // ヒント:
+      return -1; // エラー   // 1. 条件式の並び順
+    } else {                 //    * 左に変化するもの
+      var total = 0;         //    * 右に変化しにくいもの
+      for (; n > 0; n--) {   // 2. 処理する条件の順番
+        total += n;          //    * 肯定形で書く
+      }                      //    * 単純な条件を先に書く
+      return total;          //    * 関心がある条件を先に書く
+    }                        //    * 目立つ条件を先に書く
+  }                          // 3. ガード節
 
 = まとめ（1）
 
@@ -531,7 +550,7 @@ ifとreturnの使い方\n
     考えた
     * 条件式内の並び順
       * →左に変化するもの・右に変化しにくいもの
-    * 条件による処理の順番
+    * 処理する条件の順番
       * →肯定形で書く・単純な条件を先に書くなど
     * ガード節
       * →特別なケースはすぐにreturn
@@ -561,8 +580,9 @@ ifとreturnの使い方\n
     * コードから学ぶ気持ちで読む
     * ×悪いこと探し
     * ○いいこと探し
-    * 本来、コードを読むことは\n
-      楽しいことのはず！
+  * 読むコード
+    * オススメは自分が使っているOSS
+    * ↑動作を知っているから読みやすい
 
 = 悪いコード
 
