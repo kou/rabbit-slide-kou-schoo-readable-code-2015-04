@@ -249,10 +249,11 @@
     * 左側：変化する式
     * 右側：変化しにくい式
 
-= 7.2 例：処理の順番
+= 7.2 例：処理の順番（1）
 
   # coderay c
 
+  /*     どちらがリーダブル？    */
   /* A */         | /* B */
   if (a == b) {   | if (a != b) {
     /* ケース1 */ |   /* ケース2 */
@@ -260,13 +261,11 @@
     /* ケース2 */ |   /* ケース1 */
   }               | }
 
-(('tag:center'))
-どちらがリーダブル？
-
-= 7.2 例：処理の順番
+= 7.2 例：処理の順番（1）
 
   # coderay c
 
+  /*    A：条件が肯定形だから    */
   /* A */         | /* B */
   if (a == b) {   | if (a != b) {
     /* ケース1 */ |   /* ケース2 */
@@ -274,8 +273,35 @@
     /* ケース2 */ |   /* ケース1 */
   }               | }
 
-(('tag:center'))
-A（左）の方がリーダブル
+= 7.2 例：処理の順番（2）
+
+  # coderay c
+
+  /*     どちらがリーダブル？    */
+  /* （ケース1の方が処理が長い） */
+  /* A */         | /* B */
+  if (a == b) {   | if (a != b) {
+    /* ケース1 */ |   /* ケース2 */
+    /*   ...   */ |  } else {
+    /*   ...   */ |   /* ケース1 */
+  } else {        |   /*   ...   */
+    /* ケース2 */ |   /*   ...   */
+  }               | }
+
+= 7.2 例：処理の順番（2）
+
+  # coderay c
+
+  /*   B：単純な処理の条件が先   */
+  /*    if/elseを一望しやすい    */
+  /* A */         | /* B */
+  if (a == b) {   | if (a != b) {
+    /* ケース1 */ |   /* ケース2 */
+    /*   ...   */ |  } else {
+    /*   ...   */ |   /* ケース1 */
+  } else {        |   /*   ...   */
+    /* ケース2 */ |   /*   ...   */
+  }               | }
 
 = 7.2 指針
 
@@ -423,16 +449,15 @@ ifとreturnの使い方\n
 
   # コメントを追加するメソッドだな！
   def add_comment(post, user, text)
-    if post.hidden_from?(user)
-      # コメント追加しないの！？
+    if post.hidden_from?(user) # ユーザーに見えない投稿なら…
       report_access_error
+      # エラー処理か。ifの後にもなにか処理はあるのかな？
     else
-      # else（その他）の方の処理だけど
-      # このメソッドにとって大事な処理か
-      # ifの方と同列の大事さの処理かと思った
       comment = Comment.create(text)
       post.add(comment)
-    end
+      # ユーザーに見えるときだけコメント追加か。
+      # こうやってコメントを追加するんだな。
+    end # ifの後にはなにも処理はないんだな。
   end
 
 = 番外：例（1）return付き
@@ -441,22 +466,23 @@ ifとreturnの使い方\n
 
   # コメントを追加するメソッドだな！
   def add_comment(post, user, text)
-    if post.hidden_from?(user)
-      # すぐにreturnしているし特別な処理なんだな
-      report_access_error
-      return
+    if post.hidden_from?(user) # ユーザーに見えない投稿なら…
+      report_access_error # エラー処理をして、
+      return # それで終了か。
     end
 
-    # 通常はコメントを追加するんだな！
+    # エラー処理が終わったからここからは通常の処理だな。
     comment = Comment.create(text)
-    post.add(comment)
+    post.add(comment) # こうやってコメントを追加するんだな！
   end
 
 = 番外：例（1）まとめ
 
-  * 正常系と異常系の扱いを変える
-    * 正常系の方が重要なコード
+  * 異常系と正常系の扱いを変える
+  * 異常系はすぐにreturn
+    * エラー処理だけというのをアピール
   * 正常系はネストしない
+    * 正常系の方が重要なコード
     * 重要なコードは見やすい場所に
 
 = 番外：例（2）
@@ -477,14 +503,12 @@ ifとreturnの使い方\n
 
   # データベースを準備するんだな
   def prepare_database(path)
-    if not File.exist?(path)
-      # なかったら作るのか
-      # あれ、作るのも普通の「準備」なような…
+    if not File.exist?(path) # なかったら…
+      # 作ってすぐに終了か。あれ、作るのも普通の「準備」なような…
       return Database.create(path)
     end
 
-    # あったら開くのか
-    # やっぱりどっちも「準備」だよなぁ
+    # あったら開くのか。これも「準備」だよなぁ。
     # なにか特別な意図があるんだろうか…
     Database.open(path)
   end
@@ -495,12 +519,10 @@ ifとreturnの使い方\n
 
   # データベースを準備するんだな
   def prepare_database(path)
-    if File.exist?(path)
-      # あったら開いて
-      Database.open(path)
-    else
-      # なかったら作るのか
-      Database.create(path)
+    if File.exist?(path) # あったら…
+      Database.open(path) # 開いて
+    else                   # なかったら…
+      Database.create(path) # 作るのか
     end
   end
 
